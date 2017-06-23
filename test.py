@@ -37,11 +37,14 @@ def getAllProcessInfo():
         instances.append(getProcessInfo(proc))
     return instances
 
-while  True:
-    s= getAllProcessInfo()
-    sorted_x = sorted(s, key=itemgetter('memory'),reverse=True)
-    for i in sorted_x[:10]:
-        print i
-        if i['cpu'] > 100:
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    print "="*100
+#while  True:
+#    s= getAllProcessInfo()
+#    sorted_x = sorted(s, key=itemgetter('memory'),reverse=True)
+#    for i in sorted_x[:10]:
+#        print i
+#        if i['cpu'] > 100:
+#            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+#    print "="*100
+# Cpu使用率
+#while True:
+#    print str(psutil.cpu_percent(1))

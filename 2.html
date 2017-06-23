@@ -8,29 +8,27 @@
 </head>
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<button id="btn">历史数据</button>
+
 <div id="cpuss" style="width: 600px;height:400px;"></div>
+
 <div id="cpu" style="width: 300px;height:300px;"></div>
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
+        var cpu;
+        var cpuss;
         timeTicket = setInterval(function () {
             $.ajax({
                 type:'post',
-                url:'http://127.0.0.1:8080/js',
+                url:'http://localhost:8080/js',
                 dataType:'json',
                 success:function(json)
                     {
                          server_info = eval(json);
-
-                         console.log(json);                    
+                         cpu =server_info.cpu;
+                                                   
                     }
-            });
-
-            option.series[0].data[0].value = (server_info.cpu).toFixed(2) - 0;
-            option.series[1].data[0].value = (server_info.memory).toFixed(2) - 0;
-            option.series[2].data[0].value = (server_info.network).toFixed(2) - 0;
-            option.series[3].data[0].value = (server_info.disk).toFixed(2) - 0;
-            myChart.setOption(option, true);
-        }, 2000);
+            });       
             var Cpu_Chart = echarts.init(document.getElementById('cpu'));
             option = {
                 tooltip : {
@@ -46,20 +44,45 @@
                         name: '业务指标',
                         type: 'gauge',
                         detail: {formatter:'{value}%'},
-                        data: [{value: key_data[0], name: '完成率'}]
+                        data: [{value: cpu, name: '完成率'}]
                     }
                 ]
             };
-            option.series[0].data[0].value = (key_data[key_data.length-1]);
+            //option.series[0].data[0].value = (key_data[key_data.length-1]);
             Cpu_Chart.setOption(option, true);
-             //基于准备好的dom，初始化echarts实例
-            var myChart = echarts.init(document.getElementById('cpuss'));
+
+        }, 2000);
+//================================================================================
+        var btn=document.getElementById('btn');
+        var data;
+        btn.onclick=function() {
+            $.ajax({
+                type:'post',
+                url:'http://localhost:8080/cpuss',
+                contentType:"application/json",
+                dataType:'json',
+                data:{'Name':'sanmao','Password':'sanmaoword'},
+                success:function(json)
+                    {
+                         server_info = eval(json);
+                         cpuss =server_info.cpuss;
+                         cpu_data =server_info.data;
+                         cpu_data.push(cpuss);
+                                                   
+                    }
+            });
+
+            //基于准备好的dom，初始化echarts实例
+            fun_cpuss(cpu_data)
+        };
+        function fun_cpuss(cpu_data) {
+                        var myChart = echarts.init(document.getElementById('cpuss'));
             // 指定图表的配置项和数据
             option = {
 
                 title: {
-                    text: '动态数据',
-                    subtext: '纯属虚构'
+                    text: 'CPU历史状态',
+                    subtext: '使用率'
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -72,7 +95,7 @@
                     }
                 },
                 legend: {
-                    data:['最新成交价', '预购队列']
+                    data:['使用率' ]
                 },
                 toolbox: {
                     show: true,
@@ -88,7 +111,7 @@
                         data: (function (){
                             var now = new Date();
                             var res = [];
-                            var len = 100;
+                            var len = cpu_data.length;
                             while (len--) {
                                 res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
                                 now = new Date(now - 1000);
@@ -100,17 +123,17 @@
                 yAxis: {
                      type: 'value',
                      scale: true,
-                     name: '价格',
+                     name: '%',
                      min: 0,
                      boundaryGap: [0.2, 0.2]
                 },
                 dataZoom: [{
                     type: 'inside',
-                    start: 0,
+                    start: 95,
                     end: 100
                     },
                     {
-                    start: 0,
+                    start: 95,
                     end: 100,
                     handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
                     handleSize: '80%',
@@ -122,13 +145,13 @@
                     }
                 }],
                 series: {
-                    name: '最新成交价',
+                    name: '使用率',
                     type: 'line',
                     data: (function () {
                         var res = [];
-                        var len = 100;
+                        var len = cpu_data.length;
                         while (len > 0) {
-                            res.push(value_data[value_data.length-len]);
+                            res.push(cpu_data[cpu_data.length-len]);
                             len--;
                         }
                         return res;
@@ -137,7 +160,7 @@
             };
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-
+        }
     </script>
 </body>
 </html>
